@@ -30,6 +30,11 @@ export class OrdersController {
     return await this.ordersService.create(body);
   }
 
+  @Post('generate')
+  async generateFile(@Body() body) {
+    return await this.ordersService.generateFile(body);
+  }
+
   @Put(':id')
   update(
     @Param('id') id: number,

@@ -1,5 +1,4 @@
 import { CategoriesModule } from 'src/categories/categories.module';
-import { ExportFilesModule } from 'src/export-files/export-files.module';
 
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -9,11 +8,7 @@ import { ServicesController } from './services.controller';
 import { ServicesService } from './services.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Service]),
-    CategoriesModule,
-    ExportFilesModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Service]), CategoriesModule],
   controllers: [ServicesController],
   providers: [ServicesService],
   exports: [ServicesService],

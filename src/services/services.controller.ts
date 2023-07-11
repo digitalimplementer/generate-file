@@ -34,11 +34,6 @@ export class ServicesController {
     return this.servicesService.create(body);
   }
 
-  @Post('generate-file')
-  async generateFile(@Body() body) {
-    return await this.servicesService.generateFile(body);
-  }
-
   @Put(':id')
   async update(
     @Param('id') id: number,
@@ -48,7 +43,7 @@ export class ServicesController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: number) {
-    return this.servicesService.remove(id);
+  async delete(@Param('id') id: number): Promise<number> {
+    return this.servicesService.delete(id);
   }
 }

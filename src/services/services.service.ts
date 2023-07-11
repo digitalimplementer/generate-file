@@ -2,7 +2,7 @@ import { CategoriesService } from 'src/categories/categories.service';
 import { Category } from 'src/categories/entities/category.entity';
 import { ExportFilesService } from 'src/export-files/export-files.service';
 import { errorResponses } from 'src/helpers/responses';
-import { Between, In, Like, Repository } from 'typeorm';
+import { Between, Like, Repository } from 'typeorm';
 
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -19,7 +19,6 @@ export class ServicesService {
     @InjectRepository(Service)
     private readonly serviceRepository: Repository<Service>,
     private readonly categoryService: CategoriesService,
-    private readonly exportFileService: ExportFilesService,
   ) {}
 
   async findAll(query: QueryDto) {
@@ -119,30 +118,9 @@ export class ServicesService {
     return updatedService;
   }
 
-  async remove(id: number) {
-    await this.byId(id);
-
-    return this.serviceRepository.delete(id);
-  }
-
-  async generateFile(data) {
-    const where: any = {};
-
-    if (data.mode) {
-      where.mode = EServiceMode[String(data.mode)];
-    }
-
-    if (data.type) {
-      where.type = EServiceType[String(data.type)];
-    }
-
-    const res = await this.serviceRepository.find({
-      where: {
-        ...where,
-        created_at: Between(data.fromDate, data.toDate),
-      },
-    });
-
-    return res;
+  async delete(id: number): Promise<number> {
+    const foundService = await this.byId(id);
+    await this.serviceRepository.delete(id);
+    return foundService.id;
   }
 }

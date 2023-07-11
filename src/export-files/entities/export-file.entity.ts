@@ -8,10 +8,10 @@ export class ExportFile {
   @Column({ default: null })
   filename: string;
 
-  @Column({ default: new Date() })
+  @Column()
   fromDate: Date;
 
-  @Column({ default: new Date() })
+  @Column()
   toDate: Date;
 
   @Column({ default: null })
@@ -20,6 +20,6 @@ export class ExportFile {
   @Column({ default: null })
   format: string;
 
-  @Column({ default: null })
+  @Column()
   created_at: Date;
 }

@@ -4,6 +4,7 @@ import { json2xml } from 'xml-js';
 
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { FileDto } from './dtos/file.dto';
 import { ExportFile } from './entities/export-file.entity';
 import { FileFormatEnum } from './enums/export-file-format.enum';
 
@@ -30,7 +31,7 @@ export class ExportFilesService {
     return foundFile;
   }
 
-  async generate(data) {
+  async generate(data: FileDto) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const fs = require('fs');
     //  eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -75,7 +76,7 @@ export class ExportFilesService {
 
     writeStream.end();
 
-    await this.exportFileRepository.insert(data);
+    await this.exportFileRepository.insert({ ...data });
     return data.result;
   }
 

@@ -1,7 +1,9 @@
+import { ExportFilesService } from 'src/export-files/export-files.service';
+import { validateDate } from 'src/helpers/date-validation';
 import { errorResponses } from 'src/helpers/responses';
 import { Service } from 'src/services/entities/service.entity';
 import { ServicesService } from 'src/services/services.service';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -16,6 +18,7 @@ export class OrdersService {
     @InjectRepository(Order)
     private readonly orderRepository: Repository<Order>,
     private readonly service: ServicesService,
+    private readonly exportFile: ExportFilesService,
   ) {}
 
   findAll(): Promise<Order[]> {
@@ -84,6 +87,54 @@ export class OrdersService {
   }
 
   async generateFile(data) {
-    return;
+    validateDate(data.fromDate, data.toDate);
+
+    const where: any = {};
+    if (data.statuses && data.statuses.length > 0) {
+      where.status = In(
+        data.statuses.map(
+          (status) => EOrderStatus[status.toUpperCase().trim()],
+        ),
+      );
+    }
+
+    if (data.services && data.services.length > 0) {
+      where.service = In(data.services);
+    }
+
+    const result = await this.orderRepository
+      .createQueryBuilder('order')
+      .leftJoinAndSelect('order.service', 'service')
+      .select('order.id', 'id')
+      .addSelect('order.charge', 'charge')
+      .addSelect('order.link', 'link')
+      .addSelect('order.start_count', 'start_count')
+      .addSelect('order.quantity', 'quantity')
+      .addSelect('order.status', 'status')
+      .addSelect('order.remains', 'remains')
+      .addSelect('order.created_at', 'created')
+      .addSelect('order.mode', 'mode')
+      .addSelect('service.id', 'service_id')
+      .addSelect('service.title', 'service_title')
+      .where(where)
+      .getRawMany();
+
+    if (result.length <= 0) {
+      throw new BadRequestException(errorResponses.dataNotFound);
+    }
+
+    const filename = `${+new Date()}.${data.format}`;
+
+    const obj = {
+      result,
+      filename,
+      format: data.format,
+      fromDate: data.fromDate,
+      toDate: data.toDate,
+      export_by: 'orders',
+      created_at: new Date(),
+    };
+
+    return await this.exportFile.generate(obj);
   }
 }
